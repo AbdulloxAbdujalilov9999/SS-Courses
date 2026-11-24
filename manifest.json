@@ -1,0 +1,17 @@
+{
+  "name": "SS-Courses — MS Office Mastery",
+  "short_name": "SS-Courses",
+  "description": "Software Squad: Word, Excel, PowerPoint, Outlook and Teams in 12 weeks.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "lang": "uz",
+  "categories": ["education"],
+  "background_color": "#0B1030",
+  "theme_color": "#2F3BD9",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
