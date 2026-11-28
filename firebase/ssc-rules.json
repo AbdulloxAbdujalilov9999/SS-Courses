@@ -1,0 +1,19 @@
+{
+  "//": "Add this \"ssc\" node inside \"rules\" of SpeakUp's database.rules.json (the shared Firebase project), next to \"sp1\", then deploy the rules (Firebase console → Realtime Database → Rules, or firebase deploy --only database).",
+  "ssc": {
+    "progress": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('status').val() === 'approved' && (root.child('users').child(auth.uid).child('role').val() === 'owner' || root.child('users').child(auth.uid).child('role').val() === 'manager')",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (root.child('users').child(auth.uid).child('status').val() === 'approved' && (root.child('users').child(auth.uid).child('role').val() === 'owner' || root.child('users').child(auth.uid).child('role').val() === 'manager')) || (root.child('users').child(auth.uid).child('status').val() === 'approved' && root.child('users').child(auth.uid).child('role').val() === 'teacher' && root.child('users').child($uid).child('teacherId').val() === auth.uid))",
+        ".write": "auth != null && (auth.uid === $uid || (!newData.exists() && root.child('users').child(auth.uid).child('status').val() === 'approved' && (root.child('users').child(auth.uid).child('role').val() === 'owner' || root.child('users').child(auth.uid).child('role').val() === 'manager')))"
+      }
+    },
+    "grades": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('status').val() === 'approved' && (root.child('users').child(auth.uid).child('role').val() === 'owner' || root.child('users').child(auth.uid).child('role').val() === 'manager')",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (root.child('users').child(auth.uid).child('status').val() === 'approved' && (root.child('users').child(auth.uid).child('role').val() === 'owner' || root.child('users').child(auth.uid).child('role').val() === 'manager')) || (root.child('users').child(auth.uid).child('status').val() === 'approved' && root.child('users').child(auth.uid).child('role').val() === 'teacher' && root.child('users').child($uid).child('teacherId').val() === auth.uid))",
+        ".write": "auth != null && root.child('users').child(auth.uid).child('status').val() === 'approved' && (root.child('users').child(auth.uid).child('role').val() === 'owner' || root.child('users').child(auth.uid).child('role').val() === 'manager' || (root.child('users').child(auth.uid).child('role').val() === 'teacher' && root.child('users').child($uid).child('teacherId').val() === auth.uid))"
+      }
+    }
+  }
+}
