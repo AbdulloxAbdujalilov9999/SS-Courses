@@ -2,8 +2,9 @@
  *
  * Same Firebase project and the same /users accounts and roles as SpeakUp and SpeakUp-1
  * (shared/firebase-config.js is a copy). SS-Courses keeps its own data under /ssc:
- *   ssc/progress/{uid}   the student's progress (the SS.state object from ssc-core.js) + name, email
- *   ssc/grades/{uid}     marks only staff give: {proj: {p: 0-100}, prac: {k: 0-40}, task: {n: 0-10}, note}
+ *   ssc/progress/{uid}/{course}   the student's progress in one course (the SS.state object from ssc-core.js) + name, email
+ *   ssc/grades/{uid}/{course}     marks only staff give: {proj: {p: 0-100}, prac: {k: 0-40}, task: {n: 0-10}, note}
+ * {course} is the course id from courses.js ("office", "adobe"), since lesson numbers restart in every course.
  * Access rules: firebase/ssc-rules.json (merge into SpeakUp's database.rules.json, "ssc" node).
  *
  * Exposes SS.cloud: {available, user, profile, isStaff, myGrades, google(), email(), reset(), signOut(),
@@ -17,6 +18,7 @@ import { firebaseConfig, OWNER_EMAIL } from "./firebase-config.js";
 
 const SS = window.SS, L = SS.L;
 const STAFF = ["owner", "manager", "teacher"];
+const CID = SS.course.id;
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
@@ -56,12 +58,12 @@ const cloud = SS.cloud = {
   watchStudents(cb){
     const offs = [];
     if (this.isManager){
-      offs.push(onValue(ref(db, "ssc/progress"), s => cb(norm(s.val() || {})), e => cb({}, e)));
+      offs.push(onValue(ref(db, "ssc/progress"), s => { const all = s.val() || {}, o = {}; Object.keys(all).forEach(u => { if (all[u] && all[u][CID]) o[u] = all[u][CID]; }); cb(norm(o)); }, e => cb({}, e)));
     } else {
       const data = {}; let inner = [];
       offs.push(onValue(ref(db, "teacherStudents/" + this.user.uid), s => {
         inner.forEach(f => f()); inner = [];
-        Object.keys(s.val() || {}).forEach(uid => inner.push(onValue(ref(db, "ssc/progress/" + uid), x => { if (x.exists()) data[uid] = x.val(); else delete data[uid]; cb(norm(data)); }, () => {})));
+        Object.keys(s.val() || {}).forEach(uid => inner.push(onValue(ref(db, "ssc/progress/" + uid + "/" + CID), x => { if (x.exists()) data[uid] = x.val(); else delete data[uid]; cb(norm(data)); }, () => {})));
         if (!inner.length) cb({});
       }, e => cb({}, e)));
       offs.push(() => inner.forEach(f => f()));
@@ -69,13 +71,13 @@ const cloud = SS.cloud = {
     return () => offs.forEach(f => f());
     function norm(all){ const o = {}; Object.keys(all).forEach(uid => { o[uid] = Object.assign(SS.normState(all[uid]), { name: all[uid].name || "", email: all[uid].email || "" }); }); return o; }
   },
-  watchGrades(uid, cb){ return onValue(ref(db, "ssc/grades/" + uid), s => cb(s.val() || {}), () => cb({})); },
+  watchGrades(uid, cb){ return onValue(ref(db, "ssc/grades/" + uid + "/" + CID), s => cb(s.val() || {}), () => cb({})); },
   watchAllGrades(cb){
-    if (this.isManager) return onValue(ref(db, "ssc/grades"), s => cb(s.val() || {}), () => cb({}));
+    if (this.isManager) return onValue(ref(db, "ssc/grades"), s => { const all = s.val() || {}, o = {}; Object.keys(all).forEach(u => { if (all[u] && all[u][CID]) o[u] = all[u][CID]; }); cb(o); }, () => cb({}));
     // teachers: one listener per student is set up by the dashboard through watchGrades
     cb({}); return () => {};
   },
-  setGrade(uid, path, value){ return set(ref(db, `ssc/grades/${uid}/${path}`), value === "" || value == null ? null : Number(value)); },
+  setGrade(uid, path, value){ return set(ref(db, `ssc/grades/${uid}/${CID}/${path}`), value === "" || value == null ? null : Number(value)); },
 };
 
 /* the shared /users profile, created the same way SpeakUp does (the rules require this exact shape) */
@@ -101,7 +103,7 @@ onAuthStateChanged(auth, async user => {
     cloud.profile = await ensureProfile(user);
     unsubs.push(onValue(ref(db, "users/" + user.uid), s => { const was = cloud.isStaff; cloud.profile = s.val(); if (cloud.isStaff !== was) SS.route(); else SS.updateTopbar(); }));
   } catch (e) { console.warn("profile", e); }
-  const myRef = ref(db, "ssc/progress/" + user.uid);
+  const myRef = ref(db, "ssc/progress/" + user.uid + "/" + CID);
   try {
     const remote = (await get(myRef)).val();
     const merged = remote ? SS.mergeState(SS.state, remote) : SS.state;

@@ -9,6 +9,8 @@
   "use strict";
   const C = window.SSC;
   const SS = window.SS = {};
+  SS.course = window.SSC_COURSE || { id: "office", base: "data/", files: "materials/", title: C.title, apps: [] };
+  SS.courses = window.SSC_COURSES || [SS.course];
 
   /* ---------- small helpers ---------- */
   const esc = SS.esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
@@ -20,8 +22,8 @@
   SS.today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
   SS.dayNum = (iso) => Math.floor((iso ? new Date(iso + "T12:00:00") : new Date()).getTime() / 864e5);
   SS.pct = (a, b) => (b ? Math.round(100 * a / b) : 0);
-  SS.img = id => { const im = C.images[id]; return im ? "data/" + im.file : ""; };
-  SS.file = p => "materials/" + String(p).split("/").map(encodeURIComponent).join("/");
+  SS.img = id => { const im = C.images[id]; return im ? SS.course.base + im.file : ""; };
+  SS.file = p => SS.course.files + String(p).split("/").map(encodeURIComponent).join("/");
   SS.ext = p => { const m = /\.([a-z0-9]+)$/i.exec(p || ""); return m ? m[1].toLowerCase() : ""; };
   SS.fname = p => String(p || "").split("/").pop();
 
@@ -32,6 +34,11 @@
     outlook: { name: "Outlook",    letter: "O", uz: "Outlook" },
     teams:   { name: "Teams",      letter: "T", uz: "Teams" },
     office:  { name: "Office + AI", letter: "★", uz: "Integratsiya" },
+    ps:      { name: "Photoshop",      letter: "Ps", uz: "Photoshop" },
+    ai:      { name: "Illustrator",    letter: "Ai", uz: "Illustrator" },
+    pr:      { name: "Premiere Pro",   letter: "Pr", uz: "Premiere Pro" },
+    ae:      { name: "After Effects",  letter: "Ae", uz: "After Effects" },
+    adobe:   { name: "Adobe: hammasi", letter: "Cc", uz: "Integratsiya" },
   };
   SS.lesson = n => C.lessons.find(l => l.n === +n);
   SS.week = w => C.weeks.find(x => x.week === +w);
@@ -54,7 +61,10 @@
   SS.isTeacher = () => !!(SS.settings.teacher || (SS.cloud && SS.cloud.isStaff));
 
   /* ---------- progress store ---------- */
-  const PKEY = "ssc_state";
+  // progress is kept per course (the Office course keeps the original key)
+  const keyOf = id => (id === "office" ? "ssc_state" : "ssc_state_" + id);
+  const PKEY = keyOf(SS.course.id);
+  SS.peekState = id => load(keyOf(id), null);
   const blank = () => ({ xp: 0, days: {}, badges: {}, px: {}, hw: {}, seen: {}, exit: {}, srs: {}, wrong: {}, chk: {}, proj: {}, hs: {}, prac: {}, last: null, updatedAt: 0 });
   SS.state = null;   // loaded below, once normState exists
   let dirty = {}, saveT = null;
@@ -159,14 +169,17 @@
     { id: "streak7", ico: "🔥", uz: "7 kun ketma-ket", en: "7-day streak", d: "7 kun ketma-ket shugʻullaning", test: () => SS.streak() >= 7 },
     { id: "perfect", ico: "🎯", uz: "Benuqson",       en: "Perfect",    d: "Mashqni 100% bajaring",          test: s => Object.values(s.px).some(r => r[0] === r[1] && r[1] > 0) },
     { id: "hunter",  ico: "🖱️", uz: "Tugma ovchisi",  en: "Button hunter", d: "«Tugmani top» oʻyinida 100%", test: s => Object.values(s.hs).some(r => r[0] === r[1] && r[1] > 0) },
-    { id: "word",    ico: "📝", uz: "Word ustasi",    en: "Word master", d: "Word darslarini (1–9) tugating", test: () => range(1, 9).every(SS.lessonDone) },
-    { id: "outlook", ico: "📧", uz: "Outlook ustasi", en: "Outlook master", d: "Outlook darslarini (10–12) tugating", test: () => range(10, 12).every(SS.lessonDone) },
-    { id: "excel",   ico: "📊", uz: "Excel ustasi",   en: "Excel master", d: "Excel darslarini (13–24) tugating", test: () => range(13, 24).every(SS.lessonDone) },
-    { id: "ppt",     ico: "🎞️", uz: "PowerPoint ustasi", en: "PowerPoint master", d: "PowerPoint darslarini (25–30) tugating", test: () => range(25, 30).every(SS.lessonDone) },
-    { id: "teams",   ico: "💬", uz: "Teams ustasi",   en: "Teams master", d: "Teams darslarini (31–33) tugating", test: () => range(31, 33).every(SS.lessonDone) },
-    { id: "check",   ico: "🏅", uz: "Nazoratchi",     en: "Quiz taker", d: "Onlayn nazorat ishida 90%+",     test: s => Object.values(s.chk).some(c => c.max && c.score / c.max >= 0.9) },
+    { id: "check",   ico: "🏅", uz: "Nazoratchi",     en: "Quiz taker", d: "Onlayn nazorat ishida 90%+",     test: s => Object.values(s.chk).some(c => c.best && c.best.max && c.best.score / c.best.max >= 0.9) },
     { id: "review",  ico: "🧠", uz: "Xotira",         en: "Memory",     d: "Takrorlashda 50 ta javob",       test: s => (s.reviewCount || 0) >= 50 },
   ];
+  // one "master" badge per app, from the weeks of the loaded course
+  const APP_ICO = { word: "📝", excel: "📊", ppt: "🎞️", outlook: "📧", teams: "💬", ps: "🖼️", ai: "✒️", pr: "🎬", ae: "✨" };
+  const byApp = {};
+  C.lessons.forEach(l => { if (APP_ICO[l.app]) (byApp[l.app] = byApp[l.app] || []).push(l.n); });
+  Object.keys(byApp).forEach(app => {
+    const ns = byApp[app], nm = SS.APPS[app].name, rng = ns[0] + "–" + ns[ns.length - 1];
+    SS.BADGES.splice(SS.BADGES.length - 2, 0, { id: app, ico: APP_ICO[app], uz: nm + " ustasi", en: nm + " master", d: nm + " darslarini (" + rng + ") tugating", test: () => ns.every(SS.lessonDone) });
+  });
   function range(a, b){ const r = []; for (let i = a; i <= b; i++) r.push(i); return r; }
   SS.range = range;
   SS.checkBadges = () => {

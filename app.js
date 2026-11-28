@@ -22,6 +22,7 @@
   function nav(){
     const items = [
       ["#/", L("Bosh sahifa", "Home"), r => r === ""],
+      ...(SS.courses.length > 1 ? [["#/courses", L("Kurslar", "Courses"), r => r === "courses"]] : []),
       ["#/lessons", L("Darslar", "Lessons"), r => /^(lessons|week|lesson)/.test(r)],
       ["#/review", L("Takrorlash", "Review"), r => r === "review"],
       ["#/checks", L("Nazorat", "Checks"), r => /^check/.test(r)],
@@ -56,6 +57,7 @@
     const views = {
       "": home, lessons: lessons, week: () => week(+p1), lesson: () => lesson(+p1, p2 || "dars"),
     };
+    if (p0 === "courses") return courses();
     const fn = views[p0 || ""] || (SS.pages[p0] && (() => SS.pages[p0](p1, p2)));
     if (fn) fn(); else app().innerHTML = `<div class="empty"><h2>404</h2><a href="#/">${L("Bosh sahifaga", "Go home")}</a></div>`;
     document.title = (SS._title ? SS._title + " · " : "") + "SS-Courses";
@@ -75,18 +77,38 @@
   }
   SS.crumbs = (arr) => `<div class="crumbs">${arr.map(([h, t], i) => (h ? `<a href="${h}">${esc(t)}</a>` : `<span>${esc(t)}</span>`) + (i < arr.length - 1 ? " <span>›</span>" : "")).join(" ")}</div>`;
 
+  /* ---------- course picker ---------- */
+  function courses(){
+    document.title = L("Kurslar", "Courses") + " · SS-Courses";
+    app().innerHTML = `<h1>📚 ${L("Software Squad kurslari", "Software Squad courses")}</h1>
+      <p class="muted">${L("Har bir kurs – 3 oy, 12 hafta, 36 dars, 12 nazorat ishi va 4 ta loyiha. Natijalaringiz har bir kurs uchun alohida saqlanadi.", "Each course is 3 months: 12 weeks, 36 lessons, 12 checks and 4 projects. Your progress is kept separately for each course.")}</p>
+      <div class="grid grid-2">${SS.courses.map(c => {
+        const on = c.id === SS.course.id, st = on ? SS.state : SS.peekState(c.id);
+        return `<div class="card course-card ${on ? "on" : ""}" style="--cc:${esc(c.color || "var(--accent)")}">
+          <div class="row" style="gap:6px;margin-bottom:8px">${(c.apps || []).map(a => SS.appLogo(a)).join("")}</div>
+          <h2 style="margin:6px 0 4px">${esc(c.title)}</h2><div class="muted small" style="margin-bottom:8px">${esc(L(c.titleUz, c.titleEn))}</div>
+          <p>${esc(L(c.blurbUz, c.blurbEn))}</p>
+          <div class="row small muted" style="margin-bottom:12px"><span>⚡ ${(st && st.xp) || 0} XP</span><span>· 🏅 ${st ? Object.keys(st.badges || {}).length : 0} ${L("nishon", "badges")}</span></div>
+          ${on ? `<a class="btn btn-accent" href="#/">${L("Davom etish", "Continue")} →</a> <span class="tag ok">${L("Hozirgi kurs", "Current course")}</span>`
+               : `<button class="btn btn-accent" data-course="${esc(c.id)}">${L("Shu kursga oʻtish", "Switch to this course")} →</button>`}
+        </div>`; }).join("")}</div>`;
+    SS.$$("[data-course]").forEach(b => b.onclick = () => SS.switchCourse(b.dataset.course));
+  }
+  SS.switchCourse = id => { try { localStorage.setItem("ssc_course", id); } catch (e) {} location.hash = "#/"; location.reload(); };
+
   /* ---------- home ---------- */
   function home(){
     const nl = nextLesson(), st = SS.state;
     const doneL = C.lessons.filter(l => SS.lessonDone(l.n)).length;
     const due = SS.srsDue().length;
-    const apps = ["word", "excel", "ppt", "outlook", "teams"];
+    const CO = SS.course, apps = CO.apps && CO.apps.length ? CO.apps : [];
     app().innerHTML = `
-      <section class="hero">
+      <section class="hero" ${CO.hero ? `style="background:${esc(CO.hero)}"` : ""}>
         <svg class="hero-deco" viewBox="0 0 100 100"><rect x="0" y="0" width="46" height="46" rx="9" fill="#fff"/><rect x="54" y="0" width="46" height="46" rx="9" fill="#fff"/><rect x="0" y="54" width="46" height="46" rx="9" fill="#fff"/><rect x="54" y="54" width="46" height="46" rx="9" fill="#fff"/></svg>
+        ${SS.courses.length > 1 ? `<a class="course-switch" href="#/courses">📚 ${L("Kurslar", "Courses")}: ${SS.courses.map(c => c.id === CO.id ? `<b>${esc(c.title)}</b>` : esc(c.title)).join(" · ")} ⇄</a>` : ""}
         <div class="small" style="letter-spacing:.12em;opacity:.75;font-weight:600">SOFTWARE SQUAD · ${esc(C.title.toUpperCase())}</div>
-        <h1>${L("MS Office: noldan ustagacha", "MS Office: from zero to expert")}</h1>
-        <p>${L("12 hafta, 36 dars: Word, Excel, PowerPoint, Outlook va Teams. Har bir koʻnikma rasmli qadamlar bilan, har bir darsda mashqlar, amaliy ish va uy vazifasi.", "12 weeks, 36 lessons: Word, Excel, PowerPoint, Outlook and Teams. Every skill shown step by step with screenshots, with practice, a hands-on task and homework in every lesson.")}</p>
+        <h1>${esc(L(CO.titleUz || C.title, CO.titleEn))}</h1>
+        <p>${esc(L(CO.blurbUz || "", CO.blurbEn))}</p>
         <div class="apps">${apps.map(a => `<span><i style="background:var(--${a})"></i>${SS.APPS[a].name}</span>`).join("")}</div>
         <div class="row">
           <a class="btn btn-accent btn-lg" href="#/lesson/${nl.n}">${st.last ? L("Davom etish", "Continue") : L("Boshlash", "Start")}: ${nl.n}-${L("dars", "lesson")} →</a>

@@ -18,7 +18,7 @@
     const w = SS.week(weekN); if (!w) return;
     const sec = w.deck.sections[secIdx]; if (!sec) return;
     const url = SS.file(w.deck.pdf);
-    const posKey = "ssc_pos_" + weekN + "_" + secIdx;
+    const posKey = "ssc_pos_" + SS.course.id + "_" + weekN + "_" + secIdx;
     const teacher = SS.isTeacher();
     let showAns = teacher && !SS.settings.skipAns;
     const all = sec.slides.length ? sec.slides : SS.range(sec.start, sec.end).map(n => ({ n, label: "", title: "" }));

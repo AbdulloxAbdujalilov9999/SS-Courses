@@ -1,7 +1,12 @@
-# SS-Courses — MS Office Mastery
+# SS-Courses — Software Squad courses
 
-**Software Squad**'s course platform: Word, Excel, PowerPoint, Outlook and Teams, from beginner to almost expert, in
-12 weeks (36 lessons, 12 checks including the final exam, 4 portfolio projects). Built like speakup-v1: one static
+**Software Squad**'s course platform, with two courses that each take a student from beginner to almost expert in
+12 weeks (36 lessons, 12 checks including the final exam, 4 portfolio projects):
+
+- **MS Office Mastery**: Word, Excel, PowerPoint, Outlook and Teams
+- **Adobe Creative Mastery**: Photoshop, Illustrator, Premiere Pro and After Effects
+
+Students pick a course under **Kurslar** (or open the site with `?course=adobe`). Each course keeps its own progress. Built like speakup-v1: one static
 site, no build step, the same Firebase accounts, Uzbek interface with an English switch, light/dark theme, installable on a phone.
 
 ## What's inside
@@ -37,7 +42,7 @@ site, no build step, the same Firebase accounts, Uzbek interface with an English
 ## Accounts and data
 
 Signing in is optional: progress is always saved in the browser. When a student signs in (with the same accounts as SpeakUp),
-progress syncs to Firebase under `ssc/progress/{uid}`, and teachers give marks under `ssc/grades/{uid}`.
+progress syncs to Firebase under `ssc/progress/{uid}/{course}`, and teachers give marks under `ssc/grades/{uid}/{course}`.
 **Before the cloud part works**, add the `ssc` node from [`firebase/ssc-rules.json`](firebase/ssc-rules.json) to SpeakUp's
 `database.rules.json` (same Firebase project) and deploy the rules. Teacher mode turns on by itself for owner, manager and
 teacher accounts. On a classroom computer it can also be switched on under Settings.
@@ -46,13 +51,24 @@ teacher accounts. On a classroom computer it can also be switched on under Setti
 
 `python3 -m http.server 8770` in this folder, then open http://localhost:8770. Any static host works (GitHub Pages, Netlify, Render static site).
 
+## Courses
+
+`courses.js` lists the courses: where each one's data, screenshots and files live, its title, apps and colours.
+Only the chosen course's data file is loaded.
+
+| course | data | files |
+|---|---|---|
+| office | `data/course.js`, `data/images/` | `materials/` |
+| adobe | `data/adobe/course.js`, `data/adobe/images/` (WebP) | `materials-adobe/` |
+
 ## Update the content
 
-The materials are built in the project's materials folder (`materials/6 - Data for SS-Courses/course.json` plus the decks, homework,
+The materials are built in the project's materials folders (`materials/6 - Data for SS-Courses/course.json` plus the decks, homework,
 answers, checks, practice files and projects). To bring a new version in:
 
 ```
-python3 tools/import.py "<path>/materials" .
+python3 tools/import.py "<path>/materials" .                                  # MS Office Mastery
+python3 tools/import.py "<path>/materials-adobe" . --course adobe --webp      # Adobe Creative Mastery
 ```
 
 It writes `data/course.js`, copies the screenshots to `data/images/` and the files to `materials/`, and lists anything missing.
@@ -61,6 +77,7 @@ It writes `data/course.js`, copies the screenshots to `data/images/` and the fil
 
 ```
 index.html               page shell
+courses.js               the course list; loads the chosen course's data
 app.js                   router, home, weeks, lesson page (all 9 tabs)
 shared/ssc-core.js       settings, progress store, XP/streak/badges, review queue, answer checking
 shared/ssc-practice.js   exercise engine (7 exercise types, practice / homework / test modes)

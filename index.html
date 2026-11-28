@@ -5,7 +5,7 @@
 <meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SS-Courses</title>
-<meta name="description" content="SS-Courses by Software Squad — MS Office Mastery: Word, Excel, PowerPoint, Outlook and Teams in 12 weeks. 36 lessons with step-by-step screenshots, practice, homework, checks, projects and a teacher dashboard.">
+<meta name="description" content="SS-Courses by Software Squad — MS Office Mastery and Adobe Creative Mastery, 12 weeks each. 36 lessons with step-by-step screenshots, practice, homework, checks, projects and a teacher dashboard.">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0B1030">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="shared/ssc.css?v=1">
+<link rel="stylesheet" href="shared/ssc.css?v=2">
 <script>
   try{
     var s = JSON.parse(localStorage.getItem("ssc_settings") || "{}") || {};
@@ -29,7 +29,7 @@
   <div class="topbar-inner">
     <a class="brand" href="#/">
       <img src="icons/icon-192.png" alt="" width="36" height="36">
-      <span><span class="brand-mark">SS-COURSES</span><span class="brand-sub">SOFTWARE SQUAD · MS OFFICE MASTERY</span></span>
+      <span><span class="brand-mark">SS-COURSES</span><span class="brand-sub" id="brandSub">SOFTWARE SQUAD</span></span>
     </a>
     <nav id="mainNav" aria-label="Main"></nav>
     <div class="topbar-actions" id="topActions"></div>
@@ -41,18 +41,19 @@
 <div id="modalRoot"></div>
 
 <script src="vendor/pdf.min.js"></script>
-<script src="data/course.js?v=41"></script>
-<script src="shared/ssc-core.js?v=1"></script>
-<script src="shared/ssc-practice.js?v=1"></script>
-<script src="shared/ssc-present.js?v=1"></script>
-<script src="app.js?v=1"></script>
-<script src="shared/ssc-pages.js?v=1"></script>
-<script src="shared/ssc-dashboard.js?v=1"></script>
+<script src="courses.js?v=2"></script>
+<script src="shared/ssc-core.js?v=2"></script>
+<script src="shared/ssc-practice.js?v=2"></script>
+<script src="shared/ssc-present.js?v=2"></script>
+<script src="app.js?v=2"></script>
+<script src="shared/ssc-pages.js?v=2"></script>
+<script src="shared/ssc-dashboard.js?v=2"></script>
 <script>
+  document.getElementById("brandSub").textContent = "SOFTWARE SQUAD · " + SSC.title.toUpperCase();
   SS.start();
   // accounts are optional: if Firebase can't load (offline, blocked), the site keeps working on this device
   setTimeout(function(){ if (!SS.cloud){ SS.cloud = { available: false, isStaff: false }; SS.refreshAcct && SS.refreshAcct(); } }, 8000);
 </script>
-<script type="module" src="shared/ssc-cloud.js?v=1"></script>
+<script type="module" src="shared/ssc-cloud.js?v=2"></script>
 </body>
 </html>

@@ -38,6 +38,7 @@
   --font-mono:'IBM Plex Mono','Consolas',monospace;
 
   --word:#2B579A; --excel:#217346; --ppt:#B7472A; --outlook:#0F6CBD; --teams:#5B5FC7; --office:#D83B01;
+  --ps:#0C6CB8; --ai:#C46A00; --pr:#6B5BD6; --ae:#8A4FD8; --adobe:#D7261E;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -46,7 +47,7 @@
     --accent:#AEB5FF; --accent-ink:#0B1030; --accent-soft:#252D6B;
     --ok:#4CC38A; --ok-soft:#173D33; --bad:#FF8F7E; --bad-soft:#4A2228; --warn:#F2C26B; --warn-soft:#45391F;
     --header-bg:#070A22; --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
-    --word:#6E9BE0; --excel:#4FB982; --ppt:#F08A6B; --outlook:#56A8F0; --teams:#9A9EF5; --office:#FF8A4C;
+    --word:#6E9BE0; --excel:#4FB982; --ppt:#F08A6B; --outlook:#56A8F0; --teams:#9A9EF5; --office:#FF8A4C; --ps:#4FB4FF; --ai:#FFAA3B; --pr:#A99CFF; --ae:#C79BFF; --adobe:#FF6B5E;
   }
 }
 :root[data-theme="dark"]{
@@ -55,7 +56,7 @@
   --accent:#AEB5FF; --accent-ink:#0B1030; --accent-soft:#252D6B;
   --ok:#4CC38A; --ok-soft:#173D33; --bad:#FF8F7E; --bad-soft:#4A2228; --warn:#F2C26B; --warn-soft:#45391F;
   --header-bg:#070A22; --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
-  --word:#6E9BE0; --excel:#4FB982; --ppt:#F08A6B; --outlook:#56A8F0; --teams:#9A9EF5; --office:#FF8A4C;
+  --word:#6E9BE0; --excel:#4FB982; --ppt:#F08A6B; --outlook:#56A8F0; --teams:#9A9EF5; --office:#FF8A4C; --ps:#4FB4FF; --ai:#FFAA3B; --pr:#A99CFF; --ae:#C79BFF; --adobe:#FF6B5E;
 }
 
 *{box-sizing:border-box}
@@ -139,6 +140,11 @@ a.card:hover{transform:translateY(-2px);border-color:var(--accent)}
 
 .app-word{--app:var(--word)} .app-excel{--app:var(--excel)} .app-ppt{--app:var(--ppt)}
 .app-outlook{--app:var(--outlook)} .app-teams{--app:var(--teams)} .app-office{--app:var(--office)}
+.app-ps{--app:var(--ps)} .app-ai{--app:var(--ai)} .app-pr{--app:var(--pr)} .app-ae{--app:var(--ae)} .app-adobe{--app:var(--adobe)}
+.app-logo{font-size:16px;letter-spacing:-.02em}
+.course-card{border-top:5px solid var(--cc)}
+.course-card.on{outline:2px solid var(--cc)}
+.course-switch{display:inline-flex;gap:6px;align-items:center;background:rgba(255,255,255,.14);color:#fff;border-radius:99px;padding:5px 12px;font-weight:600;font-size:13px;text-decoration:none;margin-bottom:10px}
 
 .bar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
 .bar > i{display:block;height:100%;background:var(--app,var(--accent));border-radius:99px;transition:width .3s}

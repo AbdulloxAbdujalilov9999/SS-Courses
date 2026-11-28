@@ -332,7 +332,7 @@
         <div class="card"><h2>🎨 ${L("Koʻrinish", "Display")}</h2>
           <div class="field"><label>${L("Til (interfeys)", "Language (interface)")}</label><div class="seg" data-set="lang"><button data-v="uz">Oʻzbekcha</button><button data-v="en">English</button></div></div>
           <div class="field"><label>${L("Mavzu", "Theme")}</label><div class="seg" data-set="theme"><button data-v="auto">${L("Avto", "Auto")}</button><button data-v="light">${L("Yorugʻ", "Light")}</button><button data-v="dark">${L("Qorongʻi", "Dark")}</button></div></div>
-          <p class="small muted">${L("Dars materiallari oʻzbek tilida, Office menyu nomlari – inglizcha.", "Lesson content is in Uzbek; Office menu names stay in English.")}</p></div>
+          <p class="small muted">${L("Dars materiallari oʻzbek tilida, dastur menyu nomlari – inglizcha.", "Lesson content is in Uzbek; menu names in the apps stay in English.")}</p></div>
         <div class="card"><h2>🧑‍🏫 ${L("Oʻqituvchi rejimi", "Teacher mode")}</h2>
           <p class="small muted">${L("Javob slaydlari, javoblar kalitlari, nazorat ishlarining qogʻoz nusxasi va oʻqituvchi paneli koʻrinadi. Oʻqituvchi hisobi bilan kirsangiz, avtomatik yoqiladi.", "Shows answer slides, answer keys, paper checks and the dashboard. Turns on automatically for teacher accounts.")}</p>
           <label class="row"><input type="checkbox" id="tMode" ${s.teacher ? "checked" : ""} ${cl && cl.isStaff ? "checked disabled" : ""}> ${L("Bu qurilmada oʻqituvchi rejimi", "Teacher mode on this device")}</label></div>
